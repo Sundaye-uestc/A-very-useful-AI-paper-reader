@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, FileText, Loader2, Sparkles, Layout, BookOpen, Layers, Globe, MessageCircle } from 'lucide-react';
+import { Upload, FileText, Loader2, Sparkles, Layout, BookOpen, Layers, Globe, MessageCircle, PlusCircle } from 'lucide-react';
 import { extractTextFromPdf } from './services/pdfService';
 import { analyzePaperContent, analyzePaperStructure } from './services/geminiService';
 import { PaperAnalysis, PaperStructure, Language } from './types';
@@ -30,6 +30,7 @@ const translations = {
     loadingDesc: "Extracting structure, insights, and building knowledge base.",
     errorUpload: "Please upload a valid PDF file.",
     errorExtract: "Could not extract enough text.",
+    uploadNew: "Upload New PDF",
     tabs: {
       [Tab.INSIGHTS]: "Deep Insights",
       [Tab.STRUCTURE]: "Structure",
@@ -51,6 +52,7 @@ const translations = {
     loadingDesc: "正在提取结构、洞察并构建知识库。",
     errorUpload: "请上传有效的 PDF 文件。",
     errorExtract: "无法提取足够的文本。",
+    uploadNew: "上传新 PDF",
     tabs: {
       [Tab.INSIGHTS]: "深度洞察",
       [Tab.STRUCTURE]: "论文结构",
@@ -118,6 +120,7 @@ const App: React.FC = () => {
     setAnalysis(null);
     setStructure(null);
     setPaperText('');
+    setFileName(null);
     setActiveTab(Tab.INSIGHTS);
   };
 
@@ -156,10 +159,22 @@ const App: React.FC = () => {
             <span className="text-xl font-bold tracking-tight text-slate-800 serif">{t.title}</span>
           </div>
           
-          <div className="flex items-center gap-4">
-             <div className="text-sm text-slate-500 hidden sm:block">
+          <div className="flex items-center gap-3">
+             <div className="text-sm text-slate-500 hidden sm:block mr-2">
               {t.subtitle}
             </div>
+
+            {/* NEW: Upload New PDF Button (Only visible when analysis exists) */}
+            {analysis && !isLoading && !isTranslating && (
+              <button 
+                onClick={resetState}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors text-sm font-medium shadow-sm"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">{t.uploadNew}</span>
+              </button>
+            )}
+
             <button 
               onClick={toggleLanguage}
               disabled={isLoading || isTranslating}

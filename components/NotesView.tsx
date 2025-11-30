@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NoteStyle, Language } from '../types';
 import { generatePaperNotes } from '../services/geminiService';
 import { BookMarked, PenTool, RefreshCw, Copy, Check } from 'lucide-react';
+import { parse } from 'marked';
 
 interface NotesViewProps {
   paperText: string;
@@ -39,6 +40,52 @@ const labels = {
       [NoteStyle.FLASHCARDS]: "复习卡片 (Q&A)"
     }
   }
+};
+
+const renderMarkdownWithMath = (text: string) => {
+  if (!text) return '';
+
+  const mathBlocks: string[] = [];
+  const mathInlines: string[] = [];
+
+  // 1. Protect Block Math $$...$$
+  // We use a placeholder that won't be messed up by markdown parser
+  let protectedText = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, match) => {
+    mathBlocks.push(match);
+    return `MATH_BLOCK_PLACEHOLDER_${mathBlocks.length - 1}`;
+  });
+
+  // 2. Protect Inline Math $...$
+  // Be careful not to match simple currency symbols like $100
+  protectedText = protectedText.replace(/\$([^$\n]+?)\$/g, (_, match) => {
+    mathInlines.push(match);
+    return `MATH_INLINE_PLACEHOLDER_${mathInlines.length - 1}`;
+  });
+
+  // 3. Parse Markdown
+  let html = parse(protectedText) as string;
+
+  // 4. Restore and Render Block Math
+  html = html.replace(/MATH_BLOCK_PLACEHOLDER_(\d+)/g, (_, index) => {
+    const tex = mathBlocks[parseInt(index)];
+    try {
+      return window.katex ? window.katex.renderToString(tex, { displayMode: true, throwOnError: false }) : tex;
+    } catch (e) {
+      return `$$${tex}$$`;
+    }
+  });
+
+  // 5. Restore and Render Inline Math
+  html = html.replace(/MATH_INLINE_PLACEHOLDER_(\d+)/g, (_, index) => {
+    const tex = mathInlines[parseInt(index)];
+    try {
+      return window.katex ? window.katex.renderToString(tex, { displayMode: false, throwOnError: false }) : tex;
+    } catch (e) {
+      return `$${tex}$`;
+    }
+  });
+
+  return html;
 };
 
 const NotesView: React.FC<NotesViewProps> = ({ paperText, lang }) => {
@@ -113,10 +160,11 @@ const NotesView: React.FC<NotesViewProps> = ({ paperText, lang }) => {
               {copied ? t.copied : t.copy}
             </button>
           </div>
-          <div className="p-8 max-w-none text-slate-800">
-            <div className="whitespace-pre-wrap font-sans text-sm md:text-base leading-relaxed">
-              {notes}
-            </div>
+          <div className="p-8 max-w-none">
+            <div 
+              className="prose prose-indigo max-w-none prose-p:leading-relaxed prose-headings:text-slate-800 prose-p:text-slate-700 prose-li:text-slate-700 prose-strong:text-slate-900"
+              dangerouslySetInnerHTML={{ __html: renderMarkdownWithMath(notes) }} 
+            />
           </div>
         </div>
       )}

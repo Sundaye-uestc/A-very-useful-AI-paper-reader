@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChatMessage, Language, ChatSession } from '../types';
 import { createChatSession } from '../services/geminiService';
 import { Send, User, Bot, Sparkles } from 'lucide-react';
+import { parse } from 'marked';
 
 interface ChatViewProps {
   paperText: string;
@@ -19,6 +20,46 @@ const labels = {
     error: "抱歉，我在回复时遇到了错误。",
     welcome: "我已经阅读了这篇论文。关于方法论、结果或结论的任何问题都可以问我！"
   }
+};
+
+// Math rendering helper (duplicated here to avoid creating new file for this simple app structure)
+const renderMarkdownWithMath = (text: string) => {
+  if (!text) return '';
+
+  const mathBlocks: string[] = [];
+  const mathInlines: string[] = [];
+
+  let protectedText = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, match) => {
+    mathBlocks.push(match);
+    return `MATH_BLOCK_PLACEHOLDER_${mathBlocks.length - 1}`;
+  });
+
+  protectedText = protectedText.replace(/\$([^$\n]+?)\$/g, (_, match) => {
+    mathInlines.push(match);
+    return `MATH_INLINE_PLACEHOLDER_${mathInlines.length - 1}`;
+  });
+
+  let html = parse(protectedText) as string;
+
+  html = html.replace(/MATH_BLOCK_PLACEHOLDER_(\d+)/g, (_, index) => {
+    const tex = mathBlocks[parseInt(index)];
+    try {
+      return window.katex ? window.katex.renderToString(tex, { displayMode: true, throwOnError: false }) : tex;
+    } catch (e) {
+      return `$$${tex}$$`;
+    }
+  });
+
+  html = html.replace(/MATH_INLINE_PLACEHOLDER_(\d+)/g, (_, index) => {
+    const tex = mathInlines[parseInt(index)];
+    try {
+      return window.katex ? window.katex.renderToString(tex, { displayMode: false, throwOnError: false }) : tex;
+    } catch (e) {
+      return `$${tex}$`;
+    }
+  });
+
+  return html;
 };
 
 const ChatView: React.FC<ChatViewProps> = ({ paperText, lang }) => {
@@ -117,9 +158,17 @@ const ChatView: React.FC<ChatViewProps> = ({ paperText, lang }) => {
                 ? 'bg-indigo-600 text-white rounded-tr-none' 
                 : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none'
             }`}>
-              <div className={`whitespace-pre-wrap text-sm leading-relaxed ${msg.role === 'user' ? 'text-white' : ''}`}>
-                 {msg.text}
-              </div>
+              {/* Conditional Rendering: Markdown+Math for Bot, Plain Text for User */}
+              {msg.role === 'model' ? (
+                 <div 
+                   className="prose prose-sm prose-indigo max-w-none prose-p:leading-relaxed prose-p:my-1 prose-ul:my-1 prose-li:my-0"
+                   dangerouslySetInnerHTML={{ __html: renderMarkdownWithMath(msg.text) }} 
+                 />
+              ) : (
+                 <div className="whitespace-pre-wrap text-sm leading-relaxed text-white">
+                   {msg.text}
+                 </div>
+              )}
             </div>
 
             {msg.role === 'user' && (

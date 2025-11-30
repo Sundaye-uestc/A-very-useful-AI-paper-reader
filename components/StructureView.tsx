@@ -22,8 +22,15 @@ const labels = {
   }
 };
 
+const formatText = (text: string) => {
+  if (!text) return '';
+  return text.replace(/\\n/g, '\n');
+};
+
 const StructureView: React.FC<StructureViewProps> = ({ data, lang }) => {
   const t = labels[lang];
+  // Defensive: Ensure keyPoints is an array
+  const points = Array.isArray(data.keyPoints) ? data.keyPoints : [];
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -35,7 +42,7 @@ const StructureView: React.FC<StructureViewProps> = ({ data, lang }) => {
           <h3>{t.tldr}</h3>
         </div>
         <p className="text-lg font-medium leading-relaxed">
-          {data.tldr}
+          {data.tldr || "..."}
         </p>
       </div>
 
@@ -46,37 +53,41 @@ const StructureView: React.FC<StructureViewProps> = ({ data, lang }) => {
           <h3>{t.keyPoints}</h3>
         </div>
         <ul className="space-y-3">
-          {data.keyPoints.map((point, idx) => (
-            <li key={idx} className="flex items-start gap-3">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex-shrink-0 mt-0.5">
-                {idx + 1}
-              </span>
-              <span className="text-slate-700">{point}</span>
-            </li>
-          ))}
+          {points.length > 0 ? (
+            points.map((point, idx) => (
+              <li key={idx} className="flex items-start gap-3">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex-shrink-0 mt-0.5">
+                  {idx + 1}
+                </span>
+                <span className="text-slate-700">{point}</span>
+              </li>
+            ))
+          ) : (
+            <li className="text-slate-400 italic text-sm">No key points extracted.</li>
+          )}
         </ul>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Research Flowchart */}
-        <div className="bg-slate-900 rounded-xl p-6 text-slate-100 shadow-md">
-          <div className="flex items-center gap-2 mb-4 text-emerald-400 font-bold">
+        <div className="bg-slate-900 rounded-xl p-6 text-slate-100 shadow-md flex flex-col h-[400px]">
+          <div className="flex items-center gap-2 mb-4 text-emerald-400 font-bold flex-shrink-0">
             <GitGraph className="w-5 h-5" />
             <h3>{t.flow}</h3>
           </div>
-          <div className="font-mono text-sm leading-relaxed whitespace-pre-wrap opacity-90 bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-            {data.researchFlow}
+          <div className="flex-1 font-mono text-sm leading-7 whitespace-pre overflow-x-auto scrollbar-thin opacity-90 bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+            {formatText(data.researchFlow || '')}
           </div>
         </div>
 
         {/* Paper Architecture Tree */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center gap-2 mb-4 text-slate-800 font-bold">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-[400px]">
+          <div className="flex items-center gap-2 mb-4 text-slate-800 font-bold flex-shrink-0">
             <FolderTree className="w-5 h-5 text-indigo-600" />
             <h3>{t.tree}</h3>
           </div>
-          <div className="font-mono text-xs md:text-sm leading-6 whitespace-pre-wrap text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-100 h-full max-h-[400px] overflow-y-auto">
-            {data.architectureTree}
+          <div className="flex-1 font-mono text-xs md:text-sm leading-6 whitespace-pre overflow-auto scrollbar-thin text-slate-600 bg-slate-50 p-4 rounded-lg border border-slate-100">
+            {formatText(data.architectureTree || '')}
           </div>
         </div>
       </div>

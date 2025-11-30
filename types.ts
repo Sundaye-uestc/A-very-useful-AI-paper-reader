@@ -69,5 +69,8 @@ export interface PdfJsLib {
 declare global {
   interface Window {
     pdfjsLib: PdfJsLib;
+    katex: {
+      renderToString: (tex: string, options?: { displayMode?: boolean; throwOnError?: boolean }) => string;
+    };
   }
 }
