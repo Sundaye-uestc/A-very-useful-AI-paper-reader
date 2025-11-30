@@ -1,0 +1,5 @@
+{
+  "name": "ScholarLens AI",
+  "description": "A lightweight tool for graduate students to automatically parse, summarize, and extract key insights from research papers using AI.",
+  "requestFramePermissions": []
+}

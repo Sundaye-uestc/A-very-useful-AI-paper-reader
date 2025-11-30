@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScholarLens AI - Research Paper Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+      // Polyfill process.env for browser environment
+      // This allows the app to run locally without a build step
+      window.process = {
+        env: {
+          API_KEY: 'AIzaSyC5KWphUFbF4Lh0ARrP1V-Uw6nv2sXdHMM'
+        }
+      };
+      
+      // Configure PDF.js worker
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+      }
+      h1, h2, h3, .serif {
+        font-family: 'Merriweather', serif;
+      }
+      /* Custom scrollbar for chat */
+      .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 20px;
+      }
+      
+      /* Markdown Styles Replacement */
+      .prose-text p { margin-bottom: 0.75rem; }
+      .prose-text ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+      .prose-text strong { font-weight: 600; color: #334155; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://esm.run/@google/genai"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
