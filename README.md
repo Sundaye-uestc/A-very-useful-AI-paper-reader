@@ -1,5 +1,4 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 <img src="https://github.com/Sundaye-uestc/A-very-useful-AI-paper-reader/blob/main/screenshot.png" />
 </div>
 
@@ -30,3 +29,4 @@ View your app in AI Studio: https://ai.studio/apps/drive/1M9T81r3Fg-zvCU7bS2iob8
 1. 安装依赖：`npm install`
 2. 在[.env.local](.env.local)中设置`GEMINI_API_KEY`为你的Gemini API密钥（推荐使用VS Code）
 3. 运行应用程序：`npm run dev`
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
